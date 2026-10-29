@@ -21,6 +21,7 @@ from ghostcam.gestures import (
     detect_open_palm,
     detect_peace_sign,
 )
+from ghostcam.ui import MENU_HEIGHT, MENU_WIDTH, render_launcher_canvas
 
 
 def make_hand(center_x: float = 0.5, extended=(True, True, False, False), spread: float = 0.06, thumb_out: bool = False):
@@ -139,6 +140,13 @@ class GhostCamTests(unittest.TestCase):
             self.assertTrue(path.is_file())
             self.assertEqual(path.suffix, ".wav")
             self.assertGreater(path.stat().st_size, 10_000)
+
+    def test_launcher_ui_canvas_renders(self):
+        base_canvas = render_launcher_canvas(-1)
+        hover_canvas = render_launcher_canvas(3)
+        self.assertEqual(base_canvas.shape, (MENU_HEIGHT, MENU_WIDTH, 3))
+        self.assertEqual(base_canvas.dtype, np.uint8)
+        self.assertTrue(np.any(base_canvas != hover_canvas))
 
 
 if __name__ == "__main__":
