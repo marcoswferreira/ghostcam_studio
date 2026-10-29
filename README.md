@@ -31,7 +31,8 @@ Every effect includes its own procedurally synthesized stereo `.wav` sound effec
 3. **Step out of the camera frame for 4 seconds** while the empty background is captured.
 4. Step back into the frame and trigger your effect using its hand gesture or press **`V`**!
 
-### Launch a specific mode directly from the terminal:
+### Launch a specific mode directly from the terminal
+
 ```powershell
 .\start_studio.bat --mode normal
 .\start_studio.bat --mode naruto
@@ -47,9 +48,11 @@ Every effect includes its own procedurally synthesized stereo `.wav` sound effec
 ## 🎥 Using with Microsoft Teams, Meet, Zoom, Discord & OBS
 
 1. Ensure [OBS Studio](https://obsproject.com/) (which provides the **OBS Virtual Camera** driver) or [Unity Capture](https://github.com/schellingb/UnityCapture) is installed:
+
    ```powershell
    winget install OBSProject.OBSStudio
    ```
+
 2. Start **`start_studio.bat`** (or **`start_virtual_cam.bat`**) first, before turning on the camera in Teams.
 3. In Microsoft Teams / Meet / Zoom / Discord, select **`OBS Virtual Camera`** as your camera device.
 
@@ -63,16 +66,6 @@ Every effect includes its own procedurally synthesized stereo `.wav` sound effec
 - **`R`**: Reappear in the camera (triggers reverse animation for Goku/Teleport, Stealth, and Portal).
 - **`F`**: Toggle fullscreen preview.
 - **`Q` / `ESC`**: Quit and release camera resources.
-
----
-
-## 📦 Building the Standalone Windows Executable (`GhostCamStudio.exe`)
-
-To package the entire studio (including MediaPipe models and synthesized audio) into a single standalone `.exe` file (`dist\GhostCamStudio.exe`):
-
-```powershell
-.\build_exe.bat
-```
 
 ---
 

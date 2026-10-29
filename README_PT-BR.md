@@ -31,7 +31,8 @@ Todos os efeitos contam com efeitos sonoros estéreo `.wav` sintetizados procedu
 3. **Saia da frente da câmera por 4 segundos** enquanto o fundo vazio é capturado.
 4. Volte para a frente da câmera e faça o gesto do efeito (ou aperte **`V`**)!
 
-### Iniciar diretamente em um modo pelo terminal:
+### Iniciar diretamente em um modo pelo terminal
+
 ```powershell
 .\start_studio.bat --mode normal
 .\start_studio.bat --mode naruto
@@ -47,9 +48,11 @@ Todos os efeitos contam com efeitos sonoros estéreo `.wav` sintetizados procedu
 ## 🎥 Como usar no Microsoft Teams, Meet, Zoom, Discord e OBS
 
 1. Instale o [OBS Studio](https://obsproject.com/) (que instala o driver **OBS Virtual Camera** no Windows):
+
    ```powershell
    winget install OBSProject.OBSStudio
    ```
+
 2. Abra primeiro o **`start_studio.bat`** (ou **`start_virtual_cam.bat`**) com o OBS fechado.
 3. No Microsoft Teams / Meet / Zoom / Discord, vá nas configurações de vídeo e selecione **`OBS Virtual Camera`**.
 
@@ -63,15 +66,3 @@ Todos os efeitos contam com efeitos sonoros estéreo `.wav` sintetizados procedu
 - **`R`**: Faz você reaparecer na câmera (com animação reversa nos modos Goku, Teletransporte, Camuflagem e Portal).
 - **`F`**: Alterna tela cheia (fullscreen).
 - **`Q` ou `ESC`**: Fecha o programa.
-
----
-
-## 📦 Como Gerar o Executável para Windows (`GhostCamStudio.exe`)
-
-Para empacotar todo o projeto (incluindo os modelos MediaPipe e os sons sintetizados) em um único arquivo executável independente (`dist\GhostCamStudio.exe`):
-
-1. Dê um duplo clique em **`build_exe.bat`** ou execute no terminal:
-   ```powershell
-   .\build_exe.bat
-   ```
-2. O script instalará automaticamente o PyInstaller no `.venv` local, gerará todos os sons e modelos via `--self-test`, compilará o executável único em **`dist\GhostCamStudio.exe`** e testará o `.exe` gerado.
