@@ -66,3 +66,10 @@ Todos os efeitos contam com efeitos sonoros estéreo `.wav` sintetizados procedu
 - **`R`**: Faz você reaparecer na câmera (com animação reversa nos modos Goku, Teletransporte, Camuflagem e Portal).
 - **`F`**: Alterna tela cheia (fullscreen).
 - **`Q` ou `ESC`**: Fecha o programa.
+
+---
+
+## 📜 Licença
+
+Copyright (c) 2026 **Marcos W. Ferreira**.
+Distribuído sob a licença **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)** — consulte o arquivo [LICENSE](LICENSE) para o texto integral.

@@ -96,3 +96,10 @@ ghostcam_studio/
 └── tests/
     └── test_ghostcam.py           # Automated unit test suite
 ```
+
+---
+
+## 📜 License
+
+Copyright (c) 2026 **Marcos W. Ferreira**.
+Licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)** — see [LICENSE](LICENSE) for full details.
