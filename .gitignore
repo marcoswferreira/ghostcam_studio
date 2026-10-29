@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.py[cod]
+build/
+dist/
+models/*.tflite
+models/*.task
+assets/generated_sounds/
