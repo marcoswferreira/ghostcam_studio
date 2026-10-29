@@ -6,3 +6,4 @@ dist/
 models/*.tflite
 models/*.task
 assets/generated_sounds/
+

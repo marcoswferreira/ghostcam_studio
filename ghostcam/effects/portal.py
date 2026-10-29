@@ -114,3 +114,4 @@ class DimensionalPortalEffect:
 
     def render_vanished(self, frame: np.ndarray, background: np.ndarray, mask: np.ndarray, age: float) -> np.ndarray:
         return background.copy()
+

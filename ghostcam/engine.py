@@ -13,12 +13,12 @@ import numpy as np
 from .audio import SoundBank
 from .config import EFFECT_BY_KEY, EFFECT_CATALOG, StudioConfig
 from .effects import create_effect
+from .effects.goku import GOKU_HOLD_SECONDS
 from .gestures import detect_mode_gesture
 from .models import VisionPipeline
 
 
 PREVIEW_WINDOW_TITLE = "GhostCam Studio - Live Feed"
-TELEPORT_HOLD_SECONDS = 1.0
 
 
 def open_physical_camera(index: int, width: int, height: int, fps: float) -> cv2.VideoCapture:
@@ -70,6 +70,7 @@ def open_virtual_output(config: StudioConfig, width: int, height: int):
 def run_studio(config: StudioConfig, initial_mode: str) -> int:
     active_mode = initial_mode
     effect = create_effect(active_mode)
+    max_num = len(EFFECT_CATALOG)
 
     with ExitStack() as stack:
         vision = VisionPipeline(need_face=True)
@@ -99,12 +100,16 @@ def run_studio(config: StudioConfig, initial_mode: str) -> int:
         background: np.ndarray | None = None
         countdown_printed: int | None = None
         hold_started: float | None = None
+        goku_countdown_reported: int | None = None
         gesture_rearmed = True
 
         spec = EFFECT_BY_KEY[active_mode]
         print(f"[GhostCam] Active Mode: {spec.title} — {spec.gesture_hint}")
         print(f"[GhostCam] Step out of the camera frame for {config.calibration_seconds:.0f}s to capture the empty background.")
-        print("[GhostCam] Controls: [1-5] Switch Effect | [SPACE] Recapture Background | [V] Vanish | [R] Reappear | [F] Fullscreen | [Q] Quit")
+        print(
+            f"[GhostCam] Controls: [1-{max_num}] Switch Effect | [SPACE] Recapture Background | "
+            "[V] Vanish | [R] Reappear | [F] Fullscreen | [Q] Quit"
+        )
 
         while True:
             ok, frame = cap.read()
@@ -141,6 +146,7 @@ def run_studio(config: StudioConfig, initial_mode: str) -> int:
                     bg_samples.clear()
                     phase = "ready"
                     hold_started = None
+                    goku_countdown_reported = None
                     gesture_rearmed = True
                     print("[GhostCam] Background ready! Step back into the camera frame.")
                 output = frame
@@ -151,8 +157,10 @@ def run_studio(config: StudioConfig, initial_mode: str) -> int:
                 output = frame
 
             else:
-                # Check hand/face gestures in 'ready' phase, or also in 'vanished' phase for teleport/stealth
-                can_detect = phase == "ready" or ( phase == "vanished" and active_mode in ("teleport", "stealth") )
+                # Check hand/face gestures in 'ready' phase, or also in 'vanished' phase for goku/teleport/stealth
+                can_detect = phase == "ready" or (
+                    phase == "vanished" and active_mode in ("goku", "teleport", "stealth")
+                )
                 if can_detect and (now - last_gesture_check) >= 0.08:
                     last_gesture_check = now
                     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -163,17 +171,27 @@ def run_studio(config: StudioConfig, initial_mode: str) -> int:
                     if config.debug_gestures:
                         print(f"[Debug] mode={active_mode} hands={len(hands)} faces={len(faces)} matched={matched}")
 
+                    is_goku_mode = active_mode in ("goku", "teleport")
                     if not matched:
+                        if is_goku_mode and hold_started is not None:
+                            print("[Goku] Pose interrupted: countdown reset.")
                         hold_started = None
+                        goku_countdown_reported = None
                         gesture_rearmed = True
                     elif gesture_rearmed:
-                        # Teleport requires a 1-second hold; other modes trigger immediately
-                        req_hold = TELEPORT_HOLD_SECONDS if active_mode == "teleport" else 0.0
+                        req_hold = GOKU_HOLD_SECONDS if is_goku_mode else 0.0
                         if hold_started is None:
                             hold_started = now
+                            goku_countdown_reported = None
                         held = now - hold_started
+                        if is_goku_mode:
+                            tenths_left = max(0, int(np.ceil((req_hold - held) * 10)))
+                            if tenths_left != goku_countdown_reported and tenths_left in (10, 7, 4, 1):
+                                print(f"[Goku] Teleporting in {tenths_left / 10:.1f}s...")
+                                goku_countdown_reported = tenths_left
                         if held >= req_hold:
                             hold_started = None
+                            goku_countdown_reported = None
                             gesture_rearmed = False
                             if mp_img is None:
                                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -183,13 +201,23 @@ def run_studio(config: StudioConfig, initial_mode: str) -> int:
                             effect.reset(frame, last_mask)
                             effect_start = time.perf_counter()
                             sounds.play(active_mode)
-                            phase = "returning" if phase == "vanished" else "vanishing"
-                            print(f"[GhostCam] Triggered {active_mode} ({phase})!")
+                            if phase == "vanished":
+                                phase = "returning"
+                                if is_goku_mode:
+                                    print("[Goku] Instant Transmission return!")
+                                else:
+                                    print(f"[GhostCam] Triggered {active_mode} (returning)!")
+                            else:
+                                phase = "vanishing"
+                                if is_goku_mode:
+                                    print("[Goku] Instant Transmission!")
+                                else:
+                                    print(f"[GhostCam] Triggered {active_mode} (vanishing)!")
 
                 # Update person segmentation mask when needed
                 need_live_mask = (
                     phase in ("vanishing", "returning")
-                    and active_mode != "disintegration"
+                    and active_mode not in ("particles", "disintegration")
                     and (last_mask is None or (now - last_mask_time) >= 0.05)
                 ) or (phase == "vanished" and active_mode == "stealth" and (now - last_mask_time) >= 0.06)
 
@@ -231,6 +259,9 @@ def run_studio(config: StudioConfig, initial_mode: str) -> int:
                 phase = "calibrating"
                 calibration_start = now
                 countdown_printed = None
+                hold_started = None
+                goku_countdown_reported = None
+                gesture_rearmed = True
                 bg_samples.clear()
                 print(f"[GhostCam] Step out of the frame for {config.calibration_seconds:.0f}s: capturing new background...")
             elif key == ord("v") and background is not None:
@@ -244,7 +275,7 @@ def run_studio(config: StudioConfig, initial_mode: str) -> int:
                 sounds.play(active_mode)
                 phase = "vanishing"
             elif key == ord("r") and background is not None:
-                if active_mode in ("teleport", "stealth", "portal") and phase == "vanished":
+                if active_mode in ("goku", "teleport", "stealth", "portal") and phase == "vanished":
                     effect_start = time.perf_counter()
                     sounds.play(active_mode)
                     phase = "returning"
@@ -261,6 +292,7 @@ def run_studio(config: StudioConfig, initial_mode: str) -> int:
                         effect = create_effect(active_mode)
                         phase = "ready"
                         hold_started = None
+                        goku_countdown_reported = None
                         gesture_rearmed = True
                         print(f"[GhostCam] Switched to {item.title} — {item.gesture_hint}")
                         break

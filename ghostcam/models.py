@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 import shutil
 import urllib.request
-from pathlib import Path
 
 import cv2
 import mediapipe as mp
@@ -23,22 +22,11 @@ from .config import (
 
 
 def ensure_models_available() -> None:
-    """Ensure required MediaPipe task models are present in models/."""
+    """Ensure required MediaPipe task models are present in models/, downloading from Google if needed."""
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
-    # Check if a sibling repository already has downloaded models to avoid redundant downloads
-    sibling_dir = Path(r"c:\repos\vanish_webcam")
-    sibling_candidates = {
-        SEGMENTER_MODEL_PATH: sibling_dir / "models" / "selfie_segmenter_landscape.tflite",
-        HAND_MODEL_PATH: sibling_dir / "hand_landmarker.task",
-        FACE_MODEL_PATH: sibling_dir / "face_landmarker.task",
-    }
 
     for target_path, url in MODEL_DOWNLOAD_URLS.items():
         if target_path.is_file() and target_path.stat().st_size > 100_000:
-            continue
-        sibling = sibling_candidates.get(target_path)
-        if sibling is not None and sibling.is_file() and sibling.stat().st_size > 100_000:
-            shutil.copy2(sibling, target_path)
             continue
 
         temp_path = target_path.with_suffix(target_path.suffix + ".tmp")
@@ -95,8 +83,8 @@ class VisionPipeline:
             return np.zeros((height, width), dtype=np.float32)
         raw = np.squeeze(result.confidence_masks[0].numpy_view()).astype(np.float32)
         resized = cv2.resize(raw, (width, height), interpolation=cv2.INTER_LINEAR)
-        blurred = cv2.GaussianBlur(resized, (0, 0), sigmaX=2.0, sigmaY=2.0)
-        return np.clip((blurred - 0.14) / 0.68, 0.0, 1.0)
+        blurred = cv2.GaussianBlur(resized, (0, 0), sigmaX=2.2, sigmaY=2.2)
+        return np.clip((blurred - 0.12) / 0.68, 0.0, 1.0)
 
     def detect_landmarks(self, mp_image: mp.Image, timestamp_ms: int) -> tuple[list, list]:
         hand_res = self.hand_detector.detect_for_video(mp_image, timestamp_ms)

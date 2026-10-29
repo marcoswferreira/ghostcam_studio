@@ -1,4 +1,4 @@
-"""Hand and face gesture recognition rules for all 5 GhostCam Studio effects."""
+"""Hand and face gesture recognition rules for all GhostCam Studio effects."""
 
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ def _finger_extension_ratios(pts: np.ndarray) -> tuple[list[bool], list[bool], f
 
 
 def detect_peace_sign(hands, width: int, height: int) -> bool:
-    """Mode 2 (Disintegration): Index and middle extended in a V shape, ring & pinky folded."""
+    """Normal Dissolve / Cosmic Particles: Index and middle extended in a V shape, ring & pinky folded."""
     for hand in hands:
         pts = _hand_to_pixels(hand, width, height)
         if pts is None:
@@ -53,7 +53,7 @@ def detect_peace_sign(hands, width: int, height: int) -> bool:
 
 
 def detect_joined_palms(hands, width: int, height: int) -> bool:
-    """Mode 3 (Smoke Bomb): Two hands brought close together with aligned palms."""
+    """Naruto Substitution / Ninja Smoke Bomb: Two hands brought close together with aligned palms."""
     if len(hands) < 2:
         return False
     pts_list = [_hand_to_pixels(h, width, height) for h in hands[:2]]
@@ -64,7 +64,7 @@ def detect_joined_palms(hands, width: int, height: int) -> bool:
     palm1 = p1[[0, 5, 9, 13, 17]].mean(axis=0)
     scale0 = max(float(np.linalg.norm(p0[5] - p0[17])), float(np.linalg.norm(p0[0] - p0[9])))
     scale1 = max(float(np.linalg.norm(p1[5] - p1[17])), float(np.linalg.norm(p1[0] - p1[9])))
-    if min(scale0, scale1) < 8.0:
+    if min(scale0, scale1) < 8.0 or max(scale0, scale1) > min(scale0, scale1) * 2.2:
         return False
     avg_scale = 0.5 * (scale0 + scale1)
     dir0 = p0[9] - p0[0]
@@ -80,7 +80,7 @@ def detect_joined_palms(hands, width: int, height: int) -> bool:
 
 
 def detect_forehead_salute(hands, faces, width: int, height: int) -> bool:
-    """Mode 1 (Teleport): Index + middle fingers extended together touching the forehead."""
+    """Goku Teleport / Instant Teleport: Index + middle fingers extended together touching the forehead."""
     if not hands or not faces:
         return False
     face = faces[0]
@@ -88,6 +88,9 @@ def detect_forehead_salute(hands, faces, width: int, height: int) -> bool:
         return False
     xs = np.array([lm.x * width for lm in face], dtype=np.float32)
     ys = np.array([lm.y * height for lm in face], dtype=np.float32)
+    if not (np.isfinite(xs).all() and np.isfinite(ys).all()):
+        return False
+
     fx1, fx2 = float(xs.min()), float(xs.max())
     fy1, fy2 = float(ys.min()), float(ys.max())
     fw = max(12.0, fx2 - fx1)
@@ -115,6 +118,12 @@ def detect_forehead_salute(hands, faces, width: int, height: int) -> bool:
             continue
         if float(np.linalg.norm(pts[8] - pts[12])) > palm * 0.95:
             continue
+        # Ring and pinky should not be more extended than index/middle
+        ring_reach = float(np.linalg.norm(pts[16] - wrist))
+        pinky_reach = float(np.linalg.norm(pts[20] - wrist))
+        main_reach = min(idx_reach, mid_reach)
+        if ring_reach > main_reach * 0.96 and pinky_reach > main_reach * 0.96:
+            continue
         for joint_idx in (8, 12, 7, 11):
             px, py = float(pts[joint_idx, 0]), float(pts[joint_idx, 1])
             if box_x1 <= px <= box_x2 and box_y1 <= py <= box_y2:
@@ -123,7 +132,7 @@ def detect_forehead_salute(hands, faces, width: int, height: int) -> bool:
 
 
 def detect_open_palm(hands, width: int, height: int) -> bool:
-    """Mode 4 (Optical Stealth Cloak): All 4 main fingers + thumb visibly extended."""
+    """Optical Stealth Cloak: All 4 main fingers + thumb visibly extended."""
     for hand in hands:
         pts = _hand_to_pixels(hand, width, height)
         if pts is None:
@@ -138,7 +147,7 @@ def detect_open_palm(hands, width: int, height: int) -> bool:
 
 
 def detect_horns_gesture(hands, width: int, height: int) -> bool:
-    """Mode 5 (Dimensional Portal): Rock-On / Horns gesture (index + pinky extended, middle + ring folded)."""
+    """Dimensional Portal: Rock-On / Horns gesture (index + pinky extended, middle + ring folded)."""
     for hand in hands:
         pts = _hand_to_pixels(hand, width, height)
         if pts is None:
@@ -151,11 +160,11 @@ def detect_horns_gesture(hands, width: int, height: int) -> bool:
 
 def detect_mode_gesture(mode: str, hands, faces, width: int, height: int) -> bool:
     """Dispatch gesture detection for the active studio mode."""
-    if mode == "teleport":
+    if mode in ("goku", "teleport"):
         return detect_forehead_salute(hands, faces, width, height)
-    if mode == "disintegration":
+    if mode in ("normal", "particles", "disintegration"):
         return detect_peace_sign(hands, width, height)
-    if mode == "smoke":
+    if mode in ("naruto", "smoke"):
         return detect_joined_palms(hands, width, height)
     if mode == "stealth":
         return detect_open_palm(hands, width, height)

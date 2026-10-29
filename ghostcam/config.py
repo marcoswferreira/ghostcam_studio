@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import sys
 
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
 MODELS_DIR = ROOT_DIR / "models"
-SOUNDS_DIR = ROOT_DIR / "assets" / "generated_sounds"
+ASSETS_DIR = ROOT_DIR / "assets"
+SOUNDS_DIR = ASSETS_DIR / "generated_sounds"
 
 SEGMENTER_MODEL_PATH = MODELS_DIR / "selfie_segmenter_landscape.tflite"
 HAND_MODEL_PATH = MODELS_DIR / "hand_landmarker.task"
@@ -43,53 +45,95 @@ class EffectSpec:
 
 EFFECT_CATALOG: tuple[EffectSpec, ...] = (
     EffectSpec(
-        key="teleport",
+        key="normal",
         number=1,
-        title="1  INSTANT TELEPORT",
-        subtitle="Anime Speed Lines & Instant Transmission",
-        gesture_hint="Hold index + middle fingers on forehead (1.0s) to vanish & return",
-        duration=0.52,
-        persistent_vanish=True,
-    ),
-    EffectSpec(
-        key="disintegration",
-        number=2,
-        title="2  COSMIC DISINTEGRATION",
-        subtitle="Particle Shatter & Wind Dispersion",
+        title="1  NORMAL VANISH",
+        subtitle="Plasma Wave Dissolve & Sparkle Rim",
         gesture_hint="Make a V-sign (peace gesture) with index + middle fingers",
-        duration=2.15,
+        duration=3.60,
         persistent_vanish=True,
     ),
     EffectSpec(
-        key="smoke",
-        number=3,
-        title="3  NINJA SMOKE BOMB",
-        subtitle="Smoke Cloud & Decoy Substitution",
+        key="naruto",
+        number=2,
+        title="2  NARUTO SUBSTITUTION",
+        subtitle="Kawarimi Wooden Log & Chakra Smoke",
         gesture_hint="Bring both open palms together in front of your chest",
         duration=1.45,
         persistent_vanish=True,
     ),
     EffectSpec(
-        key="stealth",
+        key="particles",
+        number=3,
+        title="3  COSMIC PARTICLES",
+        subtitle="Wind Fragment Dispersion & Embers",
+        gesture_hint="Make a V-sign (peace gesture) with index + middle fingers",
+        duration=2.15,
+        persistent_vanish=True,
+    ),
+    EffectSpec(
+        key="goku",
         number=4,
-        title="4  OPTICAL STEALTH CLOAK",
-        subtitle="Predator / Cyberpunk Refraction Camouflage",
+        title="4  GOKU TELEPORT",
+        subtitle="Instant Transmission & Speed Lines",
+        gesture_hint="Hold index + middle fingers on forehead (1.0s) to vanish & return",
+        duration=0.52,
+        persistent_vanish=True,
+    ),
+    EffectSpec(
+        key="stealth",
+        number=5,
+        title="5  OPTICAL STEALTH CLOAK",
+        subtitle="Predator / Cyberpunk Refraction Camo",
         gesture_hint="Raise an open palm (5 fingers spread) to toggle active camo",
         duration=1.10,
         persistent_vanish=True,
     ),
     EffectSpec(
         key="portal",
-        number=5,
-        title="5  DIMENSIONAL PORTAL",
-        subtitle="Swirling Energy Vortex & Gravitational Pull",
+        number=6,
+        title="6  DIMENSIONAL PORTAL",
+        subtitle="Swirling Energy Vortex & Spiral Pull",
         gesture_hint="Make a Rock-On / Horns gesture (index + pinky extended)",
         duration=1.95,
         persistent_vanish=True,
     ),
+    EffectSpec(
+        key="smoke",
+        number=7,
+        title="7  NINJA SMOKE SCROLL",
+        subtitle="Smoke Cloud & Crimson Decoy Scroll",
+        gesture_hint="Bring both open palms together in front of your chest",
+        duration=1.45,
+        persistent_vanish=True,
+    ),
 )
 
-EFFECT_BY_KEY = {spec.key: spec for spec in EFFECT_CATALOG}
+EXTRA_EFFECT_SPECS: tuple[EffectSpec, ...] = (
+    EffectSpec(
+        key="teleport",
+        number=4,
+        title="4  INSTANT TELEPORT",
+        subtitle="Anime Speed Lines & Spatial Squeeze",
+        gesture_hint="Hold index + middle fingers on forehead (1.0s) to vanish & return",
+        duration=0.52,
+        persistent_vanish=True,
+    ),
+    EffectSpec(
+        key="disintegration",
+        number=3,
+        title="3  COSMIC DISINTEGRATION",
+        subtitle="Particle Shatter & Wind Dispersion",
+        gesture_hint="Make a V-sign (peace gesture) with index + middle fingers",
+        duration=2.15,
+        persistent_vanish=True,
+    ),
+)
+
+EFFECT_BY_KEY: dict[str, EffectSpec] = {
+    **{spec.key: spec for spec in EXTRA_EFFECT_SPECS},
+    **{spec.key: spec for spec in EFFECT_CATALOG},
+}
 
 
 @dataclass

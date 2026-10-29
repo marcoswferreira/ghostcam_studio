@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -49,3 +49,4 @@ jobs:
         env:
           SDL_AUDIODRIVER: dummy
         run: python main.py --self-test
+

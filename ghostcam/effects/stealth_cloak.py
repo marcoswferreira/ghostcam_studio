@@ -71,3 +71,4 @@ class StealthCloakEffect:
     def render_vanished(self, frame: np.ndarray, background: np.ndarray, mask: np.ndarray, age: float) -> np.ndarray:
         # While vanished in Stealth mode, keep a subtle Predator shimmer where the user moves!
         return self._apply_refraction(frame, background, mask, cloak_amount=1.0, time_sec=age)
+

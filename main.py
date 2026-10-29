@@ -6,7 +6,7 @@ import argparse
 import sys
 
 from ghostcam.audio import SoundBank, ensure_synthesized_sounds
-from ghostcam.config import EFFECT_BY_KEY, StudioConfig
+from ghostcam.config import EFFECT_BY_KEY, EFFECT_CATALOG, StudioConfig
 from ghostcam.effects import create_effect
 from ghostcam.engine import run_studio
 from ghostcam.models import VisionPipeline, ensure_models_available
@@ -57,7 +57,10 @@ def run_self_test() -> int:
     vision.close()
     for key in EFFECT_BY_KEY:
         create_effect(key)
-    print("[GhostCam] Self-test passed: all 5 effects, MediaPipe models, and synthesized sounds verified.")
+    print(
+        f"[GhostCam] Self-test passed: all {len(EFFECT_CATALOG)} catalog effects "
+        "(including Goku & Naruto), MediaPipe models, and synthesized sounds verified."
+    )
     return 0
 
 

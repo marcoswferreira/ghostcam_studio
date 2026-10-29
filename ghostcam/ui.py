@@ -12,15 +12,17 @@ MENU_WINDOW_TITLE = "GhostCam Studio - Select Effect"
 
 
 def select_effect_dialog() -> str | None:
-    """Display a 5-card interactive selector window and return the chosen mode key."""
-    width, height = 760, 650
+    """Display an interactive selector window for all catalog modes and return the chosen mode key."""
+    width = 780
+    card_left, card_right = 52, width - 52
+    card_h = 74
+    card_gap = 12
+    start_top = 98
+    height = max(650, start_top + len(EFFECT_CATALOG) * (card_h + card_gap) + 28)
+
     selected: list[str | None] = [None]
     hovered: list[int] = [-1]
-
-    card_left, card_right = 56, width - 56
-    card_h = 88
-    card_gap = 14
-    start_top = 104
+    max_num = len(EFFECT_CATALOG)
 
     def render_menu() -> np.ndarray:
         canvas = np.zeros((height, width, 3), dtype=np.uint8)
@@ -30,17 +32,17 @@ def select_effect_dialog() -> str | None:
         cv2.putText(
             canvas,
             "GHOSTCAM STUDIO",
-            (56, 52),
+            (card_left, 48),
             cv2.FONT_HERSHEY_DUPLEX,
-            0.95,
+            0.92,
             (242, 246, 250),
             2,
             cv2.LINE_AA,
         )
         cv2.putText(
             canvas,
-            "Select an effect mode with your mouse or keys 1 - 5  (Press 1-5 anytime in live view to switch)",
-            (56, 80),
+            f"Select an effect mode with your mouse or keys 1 - {max_num}  (Press 1-{max_num} anytime in live view to switch)",
+            (card_left, 76),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.44,
             (155, 175, 190),
@@ -61,9 +63,9 @@ def select_effect_dialog() -> str | None:
             cv2.putText(
                 canvas,
                 spec.title,
-                (card_left + 22, top + 32),
+                (card_left + 20, top + 28),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.70,
+                0.66,
                 (245, 248, 252),
                 2,
                 cv2.LINE_AA,
@@ -71,9 +73,9 @@ def select_effect_dialog() -> str | None:
             cv2.putText(
                 canvas,
                 spec.subtitle,
-                (card_left + 355, top + 31),
+                (card_left + 335, top + 28),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.50,
+                0.49,
                 (110, 215, 250),
                 1,
                 cv2.LINE_AA,
@@ -81,9 +83,9 @@ def select_effect_dialog() -> str | None:
             cv2.putText(
                 canvas,
                 f"Gesture: {spec.gesture_hint}",
-                (card_left + 22, top + 64),
+                (card_left + 20, top + 56),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.47,
+                0.45,
                 (175, 190, 202),
                 1,
                 cv2.LINE_AA,

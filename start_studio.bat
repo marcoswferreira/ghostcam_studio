@@ -4,13 +4,8 @@ pushd "%~dp0"
 
 set "VENV_DIR=.venv"
 set "VENV_PY=%VENV_DIR%\Scripts\python.exe"
-set "SHARED_VENV=c:\repos\vanish_webcam\.venv-local\Scripts\python.exe"
 
 if exist "%VENV_PY%" goto :run
-if exist "%SHARED_VENV%" (
-  set "VENV_PY=%SHARED_VENV%"
-  goto :run
-)
 
 echo [GhostCam Studio] Creating local Python virtual environment...
 where py >nul 2>nul

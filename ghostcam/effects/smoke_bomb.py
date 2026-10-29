@@ -171,3 +171,4 @@ class SmokeBombEffect:
         landed = (cx, max(cy, output.shape[0] - int(size * 0.52)), size)
         self._overlay_sprite(output, landed, opacity=1.0)
         return output
+
